@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HTML Pastebin & Renderer</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <style>
+            body {
+                font-family: "Inter", sans-serif;
+            }
+            /* Custom placeholder for contenteditable div */
+            .paste-area:empty::before {
+                content: "Paste your copied content here...";
+                color: #6b7280; /* gray-500 */
+                cursor: text;
+            }
+            .code-view {
+                font-family: "JetBrains Mono", monospace;
+            }
+        </style>
+    </head>
+    <body
+        class="bg-gray-900 text-gray-200 flex flex-col items-center min-h-screen p-4 sm:p-6 lg:p-8"
+    >
+        <div class="w-full max-w-7xl mx-auto">
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="text-3xl sm:text-4xl font-bold text-white">
+                    HTML Pastebin & Renderer
+                </h1>
+                <p class="text-lg text-gray-400 mt-2">
+                    Copy content from any website and paste it below to see the
+                    rendered output and its raw HTML.
+                </p>
+            </header>
+
+            <!-- Controls -->
+            <div class="flex justify-center sm:justify-end gap-3 mb-4">
+                <button
+                    id="toggle-source-btn"
+                    class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 transition-colors"
+                >
+                    Show Source
+                </button>
+                <button
+                    id="clear-btn"
+                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-red-500 transition-colors"
+                >
+                    Clear All
+                </button>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Rendered Output Column -->
+                <div>
+                    <h2 class="text-2xl font-semibold mb-3 text-white">
+                        Rendered Output
+                    </h2>
+                    <div
+                        id="paste-area"
+                        contenteditable="true"
+                        class="paste-area w-full h-[60vh] min-h-[400px] bg-white text-gray-800 p-4 rounded-lg shadow-lg overflow-y-auto focus:outline-none focus:ring-4 focus:ring-indigo-500 transition"
+                    ></div>
+                </div>
+
+                <!-- Source Code Column (Initially hidden on small screens) -->
+                <div id="source-container" class="hidden lg:block">
+                    <h2 class="text-2xl font-semibold mb-3 text-white">
+                        HTML Source Code
+                    </h2>
+                    <div
+                        class="w-full h-[60vh] min-h-[400px] bg-gray-800 rounded-lg shadow-lg overflow-hidden"
+                    >
+                        <pre
+                            class="w-full h-full p-4 overflow-auto text-sm text-green-300 whitespace-pre-wrap break-all code-view"
+                        ><code id="source-code" class="language-html">The source code will appear here...</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="/main.js"></script>
+
+        <script>
+            const pasteArea = document.getElementById("paste-area");
+            const sourceCode = document.getElementById("source-code");
+            const clearButton = document.getElementById("clear-btn");
+            const toggleSourceButton =
+                document.getElementById("toggle-source-btn");
+            const sourceContainer = document.getElementById("source-container");
+
+            // Function to update the source code view
+            const updateSourceView = () => {
+                // We set textContent to prevent the browser from trying to render the HTML string
+                sourceCode.textContent = pasteArea.innerHTML;
+            };
+
+            // Listen for paste events
+            pasteArea.addEventListener("paste", (event) => {
+                // Let the browser handle the paste first, then update our source view.
+                // A timeout of 0ms defers the execution until after the DOM update.
+                setTimeout(updateSourceView, 0);
+            });
+
+            // Also update on any input (like typing or deleting)
+            pasteArea.addEventListener("input", updateSourceView);
+
+            // Clear button functionality
+            clearButton.addEventListener("click", () => {
+                pasteArea.innerHTML = "";
+                sourceCode.textContent = "The source code will appear here...";
+            });
+
+            // Toggle source view button functionality
+            toggleSourceButton.addEventListener("click", () => {
+                const isHidden = sourceContainer.classList.toggle("hidden");
+                sourceContainer.classList.toggle("lg:block", !isHidden); // re-apply lg:block if we are showing it
+
+                if (isHidden) {
+                    toggleSourceButton.textContent = "Show Source";
+                } else {
+                    toggleSourceButton.textContent = "Hide Source";
+                }
+            });
+        </script>
+    </body>
+</html>
